@@ -143,13 +143,10 @@ func forever() {
 }
 
 func stats_Loop() {
-	//var interval time.Duration = 20
+	var interval time.Duration = 5
 	for {
-		//getAllPinState()
-		//bme280()
-		//flipPinLoop()
-		//time.Sleep(interval * time.Second)
-		oled()
+		bme280()
+		time.Sleep(interval * time.Second)
 	}
 }
 
@@ -159,7 +156,7 @@ func main() {
 		panic(err)
 	}
 	defer rpio.Close()
-
+	go oled()
 	go stats_Loop()
 
 	forever()
