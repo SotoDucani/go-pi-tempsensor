@@ -57,7 +57,7 @@ func bme280() {
 	}
 	defer bus.Close()
 
-	dev, err := bmxx80.NewI2C(bus, 0x76, &bmxx80.DefaultOpts)
+	dev, err := bmxx80.NewI2C(bus, 0x77, &bmxx80.DefaultOpts)
 	if err != nil {
 		panic(err)
 	}
