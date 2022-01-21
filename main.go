@@ -82,8 +82,8 @@ func stats_Loop() {
 	var interval time.Duration = 20
 	for {
 		//getAllPinState()
-		//bme280()
-		flipPinLoop()
+		bme280()
+		//flipPinLoop()
 		time.Sleep(interval * time.Second)
 	}
 }
