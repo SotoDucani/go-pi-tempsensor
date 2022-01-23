@@ -2,32 +2,23 @@ package main
 
 import (
 	"fmt"
+	"time"
 
-	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/conn/v3/physic"
 	"periph.io/x/devices/v3/bmxx80"
-	"periph.io/x/host/v3"
 )
 
-func bme280() {
-	if _, err := host.Init(); err != nil {
-		panic(err)
+func bme_Loop(bmeDev bmxx80.Dev, envChan chan EnvData) {
+	var interval time.Duration = 5
+	for {
+		bme280(bmeDev, envChan)
+		time.Sleep(interval * time.Second)
 	}
+}
 
-	bus, err := i2creg.Open("")
-	if err != nil {
-		panic(err)
-	}
-	defer bus.Close()
-
-	dev, err := bmxx80.NewI2C(bus, 0x77, &bmxx80.DefaultOpts)
-	if err != nil {
-		panic(err)
-	}
-	defer dev.Halt()
-
+func bme280(bmeDev bmxx80.Dev, envChan chan EnvData) {
 	var env physic.Env
-	if err = dev.Sense(&env); err != nil {
+	if err := bmeDev.Sense(&env); err != nil {
 		panic(err)
 	}
 	fmt.Printf("%8s %10s %9s\n", env.Temperature, env.Pressure, env.Humidity)

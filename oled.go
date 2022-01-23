@@ -9,9 +9,7 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
-	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/devices/v3/ssd1306"
-	"periph.io/x/host/v3"
 )
 
 // convertAndResizeAndCenter takes an image, resizes and centers it on a
@@ -25,24 +23,7 @@ func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
 	return img
 }
 
-func oled() {
-	// Load all the drivers:
-	if _, err := host.Init(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Open a handle to the first available I²C bus:
-	bus, err := i2creg.Open("")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Open a handle to a ssd1306 connected on the I²C bus:
-	dev, err := ssd1306.NewI2C(bus, &ssd1306.DefaultOpts)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func oled(oledDev ssd1306.Dev, envChan chan EnvData) {
 	// Decodes an animated GIF as specified on the command line:
 	if len(os.Args) != 2 {
 		log.Fatal("please provide the path to an animated GIF")
@@ -60,7 +41,7 @@ func oled() {
 	// Converts every frame to image.Gray and resize them:
 	imgs := make([]*image.Gray, len(g.Image))
 	for i := range g.Image {
-		imgs[i] = convertAndResizeAndCenter(dev.Bounds().Dx(), dev.Bounds().Dy(), g.Image[i])
+		imgs[i] = convertAndResizeAndCenter(oledDev.Bounds().Dx(), oledDev.Bounds().Dy(), g.Image[i])
 	}
 
 	// Display the frames in a loop:
@@ -68,7 +49,7 @@ func oled() {
 		index := i % len(imgs)
 		c := time.After(time.Duration(10*g.Delay[index]) * time.Millisecond)
 		img := imgs[index]
-		dev.Draw(img.Bounds(), img, image.Point{})
+		oledDev.Draw(img.Bounds(), img, image.Point{})
 		<-c
 	}
 }
