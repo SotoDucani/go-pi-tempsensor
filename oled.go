@@ -9,8 +9,41 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
+	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/devices/v3/ssd1306"
+	"periph.io/x/host/v3"
 )
+
+func oledInit() ssd1306.Dev {
+	// Load all the drivers
+	if _, err := host.Init(); err != nil {
+		panic(err)
+	}
+
+	// Open a handle to the first available I²C bus
+	bus, err := i2creg.Open("")
+	if err != nil {
+		panic(err)
+	}
+	defer bus.Close()
+
+	oledOpts := ssd1306.Opts{
+		W:             128,
+		H:             32,
+		Rotated:       false,
+		Sequential:    false,
+		SwapTopBottom: false,
+	}
+
+	// Open a handle to a ssd1306 connected on the I²C bus
+	oledDev, err := ssd1306.NewI2C(bus, &oledOpts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer oledDev.Halt()
+
+	return *oledDev
+}
 
 // convertAndResizeAndCenter takes an image, resizes and centers it on a
 // image.Gray of size w*h.
@@ -23,7 +56,8 @@ func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
 	return img
 }
 
-func oled(oledDev ssd1306.Dev, envChan chan EnvData) {
+func oled(envChan chan EnvData) {
+	oledDev := oledInit()
 	// Decodes an animated GIF as specified on the command line:
 	if len(os.Args) != 2 {
 		log.Fatal("please provide the path to an animated GIF")

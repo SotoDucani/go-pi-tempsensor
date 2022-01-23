@@ -6,10 +6,6 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	"periph.io/x/conn/v3/i2c/i2creg"
-	"periph.io/x/devices/v3/bmxx80"
-	"periph.io/x/devices/v3/ssd1306"
-	"periph.io/x/host/v3"
 )
 
 type EnvData struct {
@@ -26,50 +22,11 @@ func forever() {
 	log.Info("Shutdown signal received...")
 }
 
-func deviceInit() (ssd1306.Dev, bmxx80.Dev) {
-	// Load all the drivers
-	if _, err := host.Init(); err != nil {
-		panic(err)
-	}
-
-	// Open a handle to the first available I²C bus
-	bus, err := i2creg.Open("")
-	if err != nil {
-		panic(err)
-	}
-	defer bus.Close()
-
-	oledOpts := ssd1306.Opts{
-		W:             128,
-		H:             32,
-		Rotated:       false,
-		Sequential:    false,
-		SwapTopBottom: false,
-	}
-
-	// Open a handle to a ssd1306 connected on the I²C bus
-	oledDev, err := ssd1306.NewI2C(bus, &oledOpts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer oledDev.Halt()
-
-	// Open a handle to a bmxx80 connected on the I²C bus
-	bmeDev, err := bmxx80.NewI2C(bus, 0x77, &bmxx80.DefaultOpts)
-	if err != nil {
-		panic(err)
-	}
-	defer bmeDev.Halt()
-
-	return *oledDev, *bmeDev
-}
-
 func main() {
-	oledDev, bmeDev := deviceInit()
 	var envChan chan EnvData
 
-	go oled(oledDev, envChan)
-	go bme_Loop(bmeDev, envChan)
+	go oled(envChan)
+	go bme_Loop(envChan)
 
 	forever()
 }
