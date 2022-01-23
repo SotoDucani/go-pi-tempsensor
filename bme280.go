@@ -10,7 +10,7 @@ import (
 	"periph.io/x/host/v3"
 )
 
-func bmeInit() bmxx80.Dev {
+func bme_Loop(envChan chan EnvData) {
 	// Load all the drivers
 	if _, err := host.Init(); err != nil {
 		panic(err)
@@ -30,14 +30,9 @@ func bmeInit() bmxx80.Dev {
 	}
 	defer bmeDev.Halt()
 
-	return *bmeDev
-}
-
-func bme_Loop(envChan chan EnvData) {
-	bmeDev := bmeInit()
 	var interval time.Duration = 5
 	for {
-		bme280(bmeDev, envChan)
+		bme280(*bmeDev, envChan)
 		time.Sleep(interval * time.Second)
 	}
 }
