@@ -14,7 +14,18 @@ import (
 	"periph.io/x/host/v3"
 )
 
-func oledInit() ssd1306.Dev {
+// convertAndResizeAndCenter takes an image, resizes and centers it on a
+// image.Gray of size w*h.
+func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
+	src = resize.Thumbnail(uint(w), uint(h), src, resize.Bicubic)
+	img := image.NewGray(image.Rect(0, 0, w, h))
+	r := src.Bounds()
+	r = r.Add(image.Point{(w - r.Max.X) / 2, (h - r.Max.Y) / 2})
+	draw.Draw(img, r, src, image.Point{}, draw.Src)
+	return img
+}
+
+func oled(envChan chan EnvData) {
 	// Load all the drivers
 	if _, err := host.Init(); err != nil {
 		panic(err)
@@ -42,22 +53,6 @@ func oledInit() ssd1306.Dev {
 	}
 	defer oledDev.Halt()
 
-	return *oledDev
-}
-
-// convertAndResizeAndCenter takes an image, resizes and centers it on a
-// image.Gray of size w*h.
-func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
-	src = resize.Thumbnail(uint(w), uint(h), src, resize.Bicubic)
-	img := image.NewGray(image.Rect(0, 0, w, h))
-	r := src.Bounds()
-	r = r.Add(image.Point{(w - r.Max.X) / 2, (h - r.Max.Y) / 2})
-	draw.Draw(img, r, src, image.Point{}, draw.Src)
-	return img
-}
-
-func oled(envChan chan EnvData) {
-	oledDev := oledInit()
 	// Decodes an animated GIF as specified on the command line:
 	if len(os.Args) != 2 {
 		log.Fatal("please provide the path to an animated GIF")
