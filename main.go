@@ -33,28 +33,29 @@ func deviceInit() (ssd1306.Dev, bmxx80.Dev) {
 	}
 
 	// Open a handle to the first available I²C bus
-	oledBus, err := i2creg.Open("")
+	bus, err := i2creg.Open("")
 	if err != nil {
 		panic(err)
 	}
-	defer oledBus.Close()
+	defer bus.Close()
+
+	oledOpts := ssd1306.Opts{
+		W:             128,
+		H:             32,
+		Rotated:       false,
+		Sequential:    false,
+		SwapTopBottom: false,
+	}
 
 	// Open a handle to a ssd1306 connected on the I²C bus
-	oledDev, err := ssd1306.NewI2C(oledBus, &ssd1306.DefaultOpts)
+	oledDev, err := ssd1306.NewI2C(bus, &oledOpts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer oledDev.Halt()
 
-	// Open a handle to the first available I²C bus
-	bmeBus, err := i2creg.Open("")
-	if err != nil {
-		panic(err)
-	}
-	defer bmeBus.Close()
-
 	// Open a handle to a bmxx80 connected on the I²C bus
-	bmeDev, err := bmxx80.NewI2C(bmeBus, 0x77, &bmxx80.DefaultOpts)
+	bmeDev, err := bmxx80.NewI2C(bus, 0x77, &bmxx80.DefaultOpts)
 	if err != nil {
 		panic(err)
 	}
