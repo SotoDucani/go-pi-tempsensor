@@ -26,7 +26,7 @@ func forever() {
 	log.Info("Shutdown signal received...")
 }
 
-func deviceInit() (*ssd1306.Dev, *bmxx80.Dev) {
+func deviceInit() (ssd1306.Dev, bmxx80.Dev) {
 	// Load all the drivers
 	if _, err := host.Init(); err != nil {
 		panic(err)
@@ -61,7 +61,7 @@ func deviceInit() (*ssd1306.Dev, *bmxx80.Dev) {
 	}
 	defer bmeDev.Halt()
 
-	return oledDev, bmeDev
+	return *oledDev, *bmeDev
 }
 
 func main() {
