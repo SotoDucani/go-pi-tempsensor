@@ -23,7 +23,7 @@ func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
 	return img
 }
 
-func oled(oledDev ssd1306.Dev, envChan chan EnvData) {
+func oled(oledDev *ssd1306.Dev, envChan chan EnvData) {
 	// Decodes an animated GIF as specified on the command line:
 	if len(os.Args) != 2 {
 		log.Fatal("please provide the path to an animated GIF")

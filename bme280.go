@@ -8,7 +8,7 @@ import (
 	"periph.io/x/devices/v3/bmxx80"
 )
 
-func bme_Loop(bmeDev bmxx80.Dev, envChan chan EnvData) {
+func bme_Loop(bmeDev *bmxx80.Dev, envChan chan EnvData) {
 	var interval time.Duration = 5
 	for {
 		bme280(bmeDev, envChan)
@@ -16,7 +16,7 @@ func bme_Loop(bmeDev bmxx80.Dev, envChan chan EnvData) {
 	}
 }
 
-func bme280(bmeDev bmxx80.Dev, envChan chan EnvData) {
+func bme280(bmeDev *bmxx80.Dev, envChan chan EnvData) {
 	var env physic.Env
 	if err := bmeDev.Sense(&env); err != nil {
 		panic(err)
