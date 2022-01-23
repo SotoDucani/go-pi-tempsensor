@@ -61,7 +61,7 @@ func main() {
 	var envChan chan EnvData
 
 	go oled(oledDev, envChan)
-	go bme_Loop(bmeDev, envChan)
+	go bme_Loop(&bmeDev, envChan)
 
 	forever()
 }
