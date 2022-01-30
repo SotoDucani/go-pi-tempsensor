@@ -93,7 +93,7 @@ func oled(envChan chan EnvData) {
 		Dot:  fixed.P(0, img.Bounds().Dy()-1-f.Descent),
 	}
 	drawer.DrawString("Hello World!")
-	err = oledDev.Draw(oledDev.Bounds(), img, image.Point{})
+	err = oledDev.Draw(img.Bounds(), img, image.Point{})
 	if err != nil {
 		panic(err)
 	}
