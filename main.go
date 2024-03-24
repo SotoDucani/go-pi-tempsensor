@@ -4,15 +4,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
-
-type EnvData struct {
-	temp     string
-	pressure string
-	humidity string
-}
 
 func forever() {
 	c := make(chan os.Signal, 1)
@@ -23,10 +18,16 @@ func forever() {
 }
 
 func main() {
-	var envChan chan EnvData
+	var Bmxx Bmxx80Device
+	var Oled OledDevice
 
-	go oled(envChan)
-	go bme_Loop(envChan)
+	Bmxx.Init()
+	defer Bmxx.Close()
+	go Bmxx.Run(5 * time.Second)
+
+	Oled.InitDefault()
+	defer Oled.Close()
+	go Oled.DisplayGif("./ballerine.gif")
 
 	forever()
 }
