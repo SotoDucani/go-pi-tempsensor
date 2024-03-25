@@ -20,14 +20,23 @@ func forever() {
 func main() {
 	var Bmxx Bmxx80Device
 	var Oled OledDevice
+	var Prom PrometheusMetrics
+	desiredTempUnits := "Fahrenheit"
 
-	Bmxx.Init()
+	// Setup the BME280
+	Bmxx.Init(desiredTempUnits)
 	defer Bmxx.Close()
 	go Bmxx.Run(5 * time.Second)
 
+	// Setup the OLED screen
 	Oled.InitDefault()
 	defer Oled.Close()
 	go Oled.DisplayGif("./ballerine.gif")
 
+	// Setup the Prometheus metrics
+	Prom.Init(desiredTempUnits)
+	go ServePromServer(&Prom)
+
+	// Run the app forever
 	forever()
 }

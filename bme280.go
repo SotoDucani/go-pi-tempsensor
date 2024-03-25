@@ -14,12 +14,13 @@ import (
 type Bmxx80Device struct {
 	DeviceHandle    bmxx80.Dev
 	I2CBus          i2c.BusCloser
-	temperatureData physic.Temperature
+	temperatureData float64
 	pressureData    physic.Pressure
 	humidityData    physic.RelativeHumidity
+	TempUnits       string
 }
 
-func (dev *Bmxx80Device) Init() {
+func (dev *Bmxx80Device) Init(TempUnits string) {
 	// Load the required drivers
 	_, err := host.Init()
 	if err != nil {
@@ -39,6 +40,7 @@ func (dev *Bmxx80Device) Init() {
 
 	dev.DeviceHandle = *bmeDev
 	dev.I2CBus = bus
+	dev.TempUnits = TempUnits
 }
 
 func (dev *Bmxx80Device) Close() {
@@ -53,7 +55,15 @@ func (dev *Bmxx80Device) Run(interval time.Duration) {
 		if err != nil {
 			panic(err)
 		}
-		dev.temperatureData = envData.Temperature
+		switch dev.TempUnits {
+		case "Fahrenheit":
+			dev.temperatureData = envData.Temperature.Fahrenheit()
+		case "Celsius":
+			dev.temperatureData = envData.Temperature.Celsius()
+		default:
+			dev.temperatureData = envData.Temperature.Fahrenheit()
+		}
+
 		dev.pressureData = envData.Pressure
 		dev.humidityData = envData.Humidity
 		fmt.Print(dev.PrintAll())
@@ -62,7 +72,14 @@ func (dev *Bmxx80Device) Run(interval time.Duration) {
 }
 
 func (dev *Bmxx80Device) PrintTemperature() string {
-	return fmt.Sprintf("%8s", dev.temperatureData)
+	switch dev.TempUnits {
+	case "Fahrenheit":
+		return fmt.Sprintf("%.1f°F", dev.temperatureData)
+	case "Celsius":
+		return fmt.Sprintf("%.1f°C", dev.temperatureData)
+	default:
+		return fmt.Sprintf("%.1f°F", dev.temperatureData)
+	}
 }
 
 func (dev *Bmxx80Device) PrintPressure() string {
@@ -74,5 +91,6 @@ func (dev *Bmxx80Device) PrintHumidity() string {
 }
 
 func (dev *Bmxx80Device) PrintAll() string {
-	return fmt.Sprintf("%8s %10s %9s\n", dev.temperatureData, dev.pressureData, dev.humidityData)
+
+	return fmt.Sprintf("%s %s %s\n", dev.PrintTemperature(), dev.PrintPressure(), dev.PrintHumidity())
 }
