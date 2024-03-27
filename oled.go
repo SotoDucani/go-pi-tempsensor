@@ -9,9 +9,13 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/math/fixed"
 	"periph.io/x/conn/v3/i2c"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/devices/v3/ssd1306"
+	"periph.io/x/devices/v3/ssd1306/image1bit"
 	"periph.io/x/host/v3"
 )
 
@@ -93,6 +97,22 @@ func (dev *OledDevice) DisplayGif(gifPath string) {
 		img := dev.ImageData[index]
 		dev.DeviceHandle.Draw(img.Bounds(), img, image.Point{})
 		<-c
+	}
+}
+
+func (dev *OledDevice) DisplayText(str string) {
+	img := image1bit.NewVerticalLSB(dev.DeviceHandle.Bounds())
+	f := basicfont.Face7x13
+	drawer := font.Drawer{
+		Dst:  img,
+		Src:  &image.Uniform{image1bit.On},
+		Face: f,
+		Dot:  fixed.P(0, img.Bounds().Dy()-1-f.Descent),
+	}
+	drawer.DrawString(str)
+	err := dev.DeviceHandle.Draw(dev.DeviceHandle.Bounds(), img, image.Point{})
+	if err != nil {
+		panic(err)
 	}
 }
 

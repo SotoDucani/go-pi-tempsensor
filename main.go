@@ -31,7 +31,8 @@ func main() {
 	// Setup the OLED screen
 	Oled.InitDefault()
 	defer Oled.Close()
-	go Oled.DisplayGif("./ballerine.gif")
+	//go Oled.DisplayGif("./ballerine.gif")
+	Oled.DisplayText("Hello World!")
 
 	// Setup the Prometheus metrics
 	Prom.Init(desiredTempUnits)
