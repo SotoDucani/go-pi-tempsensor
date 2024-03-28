@@ -1,3 +1,9 @@
+# Ignore this project's binary explicitly
+go-pi-tempsensor
+
+# Ignore a local build script folder I use when pushing to Pi's at home
+local_build/*
+
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
