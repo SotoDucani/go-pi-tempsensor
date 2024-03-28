@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func forever() {
@@ -14,7 +14,15 @@ func forever() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
 
-	log.Info("Shutdown signal received...")
+	log.Println("Shutdown signal received...")
+}
+
+func updateTempDisplay(interval int, bmxx *Bmxx80Device, oled *OledDevice) {
+	for {
+		txt := fmt.Sprintf("%s %s\n%s", bmxx.PrintTemperature(), bmxx.humidityData, bmxx.pressureData)
+		oled.DisplayText(txt)
+		time.Sleep(time.Duration(interval) * time.Second)
+	}
 }
 
 func main() {
@@ -32,7 +40,9 @@ func main() {
 	Oled.InitDefault()
 	defer Oled.Close()
 	//go Oled.DisplayGif("./ballerine.gif")
-	Oled.DisplayText("Hello World!")
+	//Oled.DisplayText("Hello World!")
+	time.Sleep(time.Second)
+	go updateTempDisplay(5, &Bmxx, &Oled)
 
 	// Setup the Prometheus metrics
 	Prom.Init(desiredTempUnits)

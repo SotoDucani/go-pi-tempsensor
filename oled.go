@@ -4,8 +4,10 @@ import (
 	"image"
 	"image/draw"
 	"image/gif"
+	"image/jpeg"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/nfnt/resize"
@@ -15,7 +17,6 @@ import (
 	"periph.io/x/conn/v3/i2c"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/devices/v3/ssd1306"
-	"periph.io/x/devices/v3/ssd1306/image1bit"
 	"periph.io/x/host/v3"
 )
 
@@ -27,7 +28,7 @@ type OledDevice struct {
 }
 
 func (dev *OledDevice) InitDefault() {
-	dev.Init(128, 32, false, false, false)
+	dev.Init(128, 32, false, true, false)
 }
 
 func (dev *OledDevice) Init(w int, h int, rotated bool, sequential bool, swapTopBottom bool) {
@@ -44,11 +45,11 @@ func (dev *OledDevice) Init(w int, h int, rotated bool, sequential bool, swapTop
 	}
 
 	oledOpts := ssd1306.Opts{
-		W:             128,
-		H:             32,
-		Rotated:       false,
-		Sequential:    false,
-		SwapTopBottom: false,
+		W:             w,
+		H:             h,
+		Rotated:       rotated,
+		Sequential:    sequential,
+		SwapTopBottom: swapTopBottom,
 	}
 
 	// Open a handle to a ssd1306 connected on the I²C bus
@@ -101,16 +102,17 @@ func (dev *OledDevice) DisplayGif(gifPath string) {
 }
 
 func (dev *OledDevice) DisplayText(str string) {
-	img := image1bit.NewVerticalLSB(dev.DeviceHandle.Bounds())
-	f := basicfont.Face7x13
-	drawer := font.Drawer{
-		Dst:  img,
-		Src:  &image.Uniform{image1bit.On},
-		Face: f,
-		Dot:  fixed.P(0, img.Bounds().Dy()-1-f.Descent),
+	img := generateTextImage(dev.DeviceHandle.Bounds().Dx(), dev.DeviceHandle.Bounds().Dy(), str)
+	output, err := os.Create("txt_display.jpg")
+	if err != nil {
+		panic(err)
 	}
-	drawer.DrawString(str)
-	err := dev.DeviceHandle.Draw(dev.DeviceHandle.Bounds(), img, image.Point{})
+	defer output.Close()
+	err = jpeg.Encode(output, img, nil)
+	if err != nil {
+		panic(err)
+	}
+	err = dev.DeviceHandle.Draw(image.Rect(0, 0, dev.DeviceHandle.Bounds().Dx(), dev.DeviceHandle.Bounds().Dy()), img, image.Point{})
 	if err != nil {
 		panic(err)
 	}
@@ -124,5 +126,33 @@ func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
 	r := src.Bounds()
 	r = r.Add(image.Point{(w - r.Max.X) / 2, (h - r.Max.Y) / 2})
 	draw.Draw(img, r, src, image.Point{}, draw.Src)
+	return img
+}
+
+func generateTextImage(w int, h int, str string) *image.RGBA {
+	log.Println("==== Generating Image ====")
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+
+	face := basicfont.Face7x13
+	lines := strings.Split(str, "\n")
+	log.Printf("Lines: %d", len(lines))
+	totalTxtHeight := face.Height * len(lines)
+	log.Printf("Text Height (Pixels): %d", totalTxtHeight)
+	startY := (h-totalTxtHeight)/2 + face.Height
+
+	for _, line := range lines {
+		txtWidth := face.Width * len(line)
+		log.Printf("Text Width (Pixels): %d", txtWidth)
+		startX := (w - txtWidth) / 2
+
+		drawer := font.Drawer{
+			Dst:  img,
+			Src:  image.White,
+			Face: face,
+			Dot:  fixed.P(startX, startY),
+		}
+		drawer.DrawString(line)
+		startY += face.Height
+	}
 	return img
 }

@@ -12,7 +12,7 @@ import (
 )
 
 type Bmxx80Device struct {
-	DeviceHandle    bmxx80.Dev
+	DeviceHandle    *bmxx80.Dev
 	I2CBus          i2c.BusCloser
 	temperatureData float64
 	pressureData    physic.Pressure
@@ -38,7 +38,7 @@ func (dev *Bmxx80Device) Init(TempUnits string) {
 		panic(err)
 	}
 
-	dev.DeviceHandle = *bmeDev
+	dev.DeviceHandle = bmeDev
 	dev.I2CBus = bus
 	dev.TempUnits = TempUnits
 }
