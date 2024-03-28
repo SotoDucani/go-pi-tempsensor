@@ -1,13 +1,3 @@
----
-id: 6CWArgBbsgQ2Jhb76LsyR
-title: Diagram
-desc: ''
-updated: 1642735822439
-created: 1642734543196
----
-
-## Diagram
-
 ```text
           Rev 2 and 3 Raspberry Pi                        Rev 1 Raspberry Pi (legacy)
 +-----+---------+----------+---------+-----+      +-----+--------+----------+--------+-----+

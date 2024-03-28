@@ -1,11 +1,3 @@
----
-id: hJYjn92qjuneiTmb7CIBC
-title: Wiring Diagram
-desc: ''
-updated: 1642869923951
-created: 1642868061856
----
-
 ```mermaid
 flowchart LR
     5v_1;5v_2;3v;Gnd;SCL;SDA
