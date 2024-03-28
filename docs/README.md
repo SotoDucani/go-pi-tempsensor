@@ -13,7 +13,7 @@
 
 ### Raspberry Pi Zero 2 W
 
-The Raspberry Pi's pinout diagrams are shown in [rpio.diagram.md](./rpio.diagram.md), which I pulled from somewhere on the internet. As long as you're not using a super old Pi, you use the Rev 2/3 diagram. Orient yourself to the diagram by holding your Pi so the GPIO rows are running along the right side. A good reference website is [pinout.xyz](https://pinout.xyz)
+The Raspberry Pi's pinout diagrams are shown in [rpio.diagram.md](./rpio.diagram.md), which I pulled from somewhere on the internet. As long as you're not using a super old Pi, you use the Rev 2/3 diagram. Orient yourself to the diagram by holding your Pi so the GPIO rows are running along the right side. A good reference website is [pinout.xyz](https://pinout.xyz) if you want a nicer visual.
 
 We'll be pulling 4 wires from the Pi's GPIO, all from the very top of the GPIO rows:
 
@@ -22,7 +22,9 @@ We'll be pulling 4 wires from the Pi's GPIO, all from the very top of the GPIO r
 - Pin 5: I2C1 Clock (SCL)
 - Pin 6: Ground
 
-Pin 1 and Pin 6 are our 3v3 Power/Ground pair that feeds both the BME280 and PiOLED. Pin 3 and Pin 5 are our I2C pair that split off to both the BME280 and PiOLED.
+Pin 1 and Pin 6 are our 3v3 Power/Ground pair that feeds both the BME280 and PiOLED.
+
+Pin 3 and Pin 5 are our I2C pair that split off to both the BME280 and PiOLED.
 
 The PiOLED hat/diagrams from Adafruit all show the device covering the Pin 2 and Pin 4 5v pins, however they are not needed for it to function.
 
