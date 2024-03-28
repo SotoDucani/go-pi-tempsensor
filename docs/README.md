@@ -11,6 +11,10 @@
 
 ## Wiring and Wiring Diagrams
 
+The main wiring diagram (it's very simple) is shown in [WiringDiagram.md](./WiringDiagram.md) using a Mermaid diagram.
+
+I'll go into more details on the pins and what connects to what below for each device.
+
 ### Raspberry Pi Zero 2 W
 
 The Raspberry Pi's pinout diagrams are shown in [rpio.diagram.md](./rpio.diagram.md), which I pulled from somewhere on the internet. As long as you're not using a super old Pi, you use the Rev 2/3 diagram. Orient yourself to the diagram by holding your Pi so the GPIO rows are running along the right side. A good reference website is [pinout.xyz](https://pinout.xyz) if you want a nicer visual.
