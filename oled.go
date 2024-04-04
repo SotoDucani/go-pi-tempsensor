@@ -130,19 +130,15 @@ func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
 }
 
 func generateTextImage(w int, h int, str string) *image.RGBA {
-	log.Println("==== Generating Image ====")
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
 	face := basicfont.Face7x13
 	lines := strings.Split(str, "\n")
-	log.Printf("Lines: %d", len(lines))
 	totalTxtHeight := face.Height * len(lines)
-	log.Printf("Text Height (Pixels): %d", totalTxtHeight)
 	startY := (h-totalTxtHeight)/2 + face.Height
 
 	for _, line := range lines {
 		txtWidth := face.Width * len(line)
-		log.Printf("Text Width (Pixels): %d", txtWidth)
 		startX := (w - txtWidth) / 2
 
 		drawer := font.Drawer{

@@ -13,7 +13,6 @@ type PrometheusMetrics struct {
 	tempUnits   string
 	pressure    prometheus.Gauge
 	humidity    prometheus.Gauge
-	registry    prometheus.Registry
 }
 
 func (em *PrometheusMetrics) Init(TempUnits string) {

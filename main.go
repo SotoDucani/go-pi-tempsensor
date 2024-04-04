@@ -17,11 +17,20 @@ func forever() {
 	log.Println("Shutdown signal received...")
 }
 
-func updateTempDisplay(interval int, bmxx *Bmxx80Device, oled *OledDevice) {
+func updateTempDisplay(interval time.Duration, bmxx *Bmxx80Device, oled *OledDevice) {
 	for {
 		txt := fmt.Sprintf("%s %s\n%s", bmxx.PrintTemperature(), bmxx.humidityData, bmxx.pressureData)
 		oled.DisplayText(txt)
-		time.Sleep(time.Duration(interval) * time.Second)
+		time.Sleep(interval * time.Second)
+	}
+}
+
+func updatePromMetrics(interval time.Duration, bmxx *Bmxx80Device, em *PrometheusMetrics) {
+	for {
+		em.temperature.Set(bmxx.temperatureData)
+		em.humidity.Set(float64(bmxx.humidityData))
+		em.pressure.Set(float64(bmxx.pressureData))
+		time.Sleep(interval)
 	}
 }
 
@@ -30,23 +39,24 @@ func main() {
 	var Oled OledDevice
 	var Prom PrometheusMetrics
 	desiredTempUnits := "Fahrenheit"
+	desiredUpdateIntervals := time.Duration(5)
 
-	// Setup the BME280
+	// Setup and start running the BME280
 	Bmxx.Init(desiredTempUnits)
 	defer Bmxx.Close()
-	go Bmxx.Run(5 * time.Second)
+	go Bmxx.Run(desiredUpdateIntervals * time.Second)
 
-	// Setup the OLED screen
+	// Setup and start running the OLED screen
 	Oled.InitDefault()
 	defer Oled.Close()
-	//go Oled.DisplayGif("./ballerine.gif")
-	//Oled.DisplayText("Hello World!")
+	// Sleep for a second so our first display update has data
 	time.Sleep(time.Second)
-	go updateTempDisplay(5, &Bmxx, &Oled)
+	go updateTempDisplay(desiredUpdateIntervals, &Bmxx, &Oled)
 
-	// Setup the Prometheus metrics
+	// Setup and start running the Prometheus metrics
 	Prom.Init(desiredTempUnits)
 	go ServePromServer(&Prom)
+	go updatePromMetrics(desiredUpdateIntervals, &Bmxx, &Prom)
 
 	// Run the app forever
 	forever()
