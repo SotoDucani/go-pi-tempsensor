@@ -25,6 +25,15 @@ func updateTempDisplay(interval time.Duration, bmxx *Bmxx80Device, oled *OledDev
 	}
 }
 
+func updatePromMetrics(interval time.Duration, bmxx *Bmxx80Device, em *PrometheusMetrics) {
+	for {
+		em.temperature.Set(bmxx.temperatureData)
+		em.humidity.Set(float64(bmxx.humidityData))
+		em.pressure.Set(float64(bmxx.pressureData))
+		time.Sleep(interval)
+	}
+}
+
 func main() {
 	var Bmxx Bmxx80Device
 	var Oled OledDevice
@@ -47,6 +56,7 @@ func main() {
 	// Setup and start running the Prometheus metrics
 	Prom.Init(desiredTempUnits)
 	go ServePromServer(&Prom)
+	go updatePromMetrics(desiredUpdateIntervals, &Bmxx, &Prom)
 
 	// Run the app forever
 	forever()
