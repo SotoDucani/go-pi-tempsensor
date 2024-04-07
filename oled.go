@@ -10,9 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang/freetype/truetype"
 	"github.com/nfnt/resize"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
+	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
 	"periph.io/x/conn/v3/i2c"
 	"periph.io/x/conn/v3/i2c/i2creg"
@@ -132,13 +133,21 @@ func convertAndResizeAndCenter(w, h int, src image.Image) *image.Gray {
 func generateTextImage(w int, h int, str string) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 
-	face := basicfont.Face7x13
+	goRegFont, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		panic(err)
+	}
+	opts := truetype.Options{}
+	opts.Size = 13
+	face := truetype.NewFace(goRegFont, &opts)
+
 	lines := strings.Split(str, "\n")
-	totalTxtHeight := face.Height * len(lines)
-	startY := (h-totalTxtHeight)/2 + face.Height
+	lineTxtHeight := (face.Metrics().Ascent.Ceil() + face.Metrics().Descent.Ceil())
+	totalTxtHeight := lineTxtHeight * len(lines)
+	startY := (h-totalTxtHeight)/2 + lineTxtHeight
 
 	for _, line := range lines {
-		txtWidth := face.Width * len(line)
+		txtWidth := font.MeasureString(face, line).Ceil()
 		startX := (w - txtWidth) / 2
 
 		drawer := font.Drawer{
@@ -148,7 +157,7 @@ func generateTextImage(w int, h int, str string) *image.RGBA {
 			Dot:  fixed.P(startX, startY),
 		}
 		drawer.DrawString(line)
-		startY += face.Height
+		startY += lineTxtHeight
 	}
 	return img
 }
