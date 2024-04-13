@@ -38,23 +38,28 @@ func main() {
 	var Bmxx Bmxx80Device
 	var Oled OledDevice
 	var Prom PrometheusMetrics
-	desiredTempUnits := "Fahrenheit"
-	desiredUpdateIntervals := time.Duration(5)
+	var Config Config
+
+	// Load up app config
+	InitConfig(&Config)
+
+	desiredUpdateIntervals := time.Duration(Config.PollingInterval)
 
 	// Setup and start running the BME280
-	Bmxx.Init(desiredTempUnits)
+	Bmxx.Init(Config.TemperatureUnits)
 	defer Bmxx.Close()
 	go Bmxx.Run(desiredUpdateIntervals * time.Second)
 
 	// Setup and start running the OLED screen
 	Oled.InitDefault()
+	Oled.Init(Config.ScreenWidth, Config.ScreenHeight, Config.ScreenRotated, Config.ScreenSquential, Config.ScreenSwapTopBottom)
 	defer Oled.Close()
 	// Sleep for a second so our first display update has data
 	time.Sleep(time.Second)
 	go updateTempDisplay(desiredUpdateIntervals, &Bmxx, &Oled)
 
 	// Setup and start running the Prometheus metrics
-	Prom.Init(desiredTempUnits)
+	Prom.Init(Config.TemperatureUnits)
 	go ServePromServer(&Prom)
 	go updatePromMetrics(desiredUpdateIntervals, &Bmxx, &Prom)
 
