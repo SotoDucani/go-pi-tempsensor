@@ -29,7 +29,7 @@ type OledDevice struct {
 }
 
 func (dev *OledDevice) InitDefault() {
-	dev.Init(128, 32, false, true, false)
+	dev.Init(128, 32, true, true, false)
 }
 
 func (dev *OledDevice) Init(w int, h int, rotated bool, sequential bool, swapTopBottom bool) {
