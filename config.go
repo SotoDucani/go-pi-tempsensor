@@ -18,7 +18,7 @@ type Config struct {
 }
 
 func InitConfig(config *Config) {
-	err := envconfig.Process("tempsense", &config)
+	err := envconfig.Process("tempsense", config)
 	if err != nil {
 		panic(err)
 	}
