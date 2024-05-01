@@ -33,7 +33,16 @@ func (dev *Bmxx80Device) Init(TempUnits string) {
 		panic(err)
 	}
 
-	bmeDev, err := bmxx80.NewI2C(bus, 0x77, &bmxx80.DefaultOpts)
+	// As is this a 'weather station' type project, we're setting Oversampling
+	// opts as suggested in the bmxx80 documentation, which is supported by
+	// the official BME280 datasheet
+	bmeOpts := bmxx80.Opts{
+		Temperature: bmxx80.O1x,
+		Pressure:    bmxx80.O1x,
+		Humidity:    bmxx80.O1x,
+	}
+
+	bmeDev, err := bmxx80.NewI2C(bus, 0x77, &bmeOpts)
 	if err != nil {
 		panic(err)
 	}
